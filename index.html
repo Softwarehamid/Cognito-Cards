@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/cognito-logo.svg" />
+    <link rel="apple-touch-icon" href="/cognito-logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4f46e5" />
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="AI-powered flashcard learning platform with multiple study modes, spaced repetition, and intelligent card generation. Create, study, and master any subject with smart flashcards."
+    />
+    <meta
+      name="keywords"
+      content="flashcards, AI learning, spaced repetition, study cards, education, learning platform, AI tutoring, smart cards"
+    />
+    <meta name="author" content="Cognito Cards" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://cognitocards.abdulhamidoguntade.com/"
+    />
+    <meta
+      property="og:title"
+      content="Cognito Cards - AI-Powered Flashcard Learning Platform"
+    />
+    <meta
+      property="og:description"
+      content="Transform your learning with AI-generated flashcards. Features multiple study modes, spaced repetition, and works with 5+ AI providers for reliable card generation."
+    />
+    <meta
+      property="og:image"
+      content="https://cognitocards.abdulhamidoguntade.com/social-preview.svg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Cognito Cards" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://cognitocards.abdulhamidoguntade.com/"
+    />
+    <meta
+      name="twitter:title"
+      content="Cognito Cards - AI-Powered Flashcard Learning Platform"
+    />
+    <meta
+      name="twitter:description"
+      content="Smart flashcard learning with AI generation, spaced repetition, and multiple study modes. Perfect for students, educators, and lifelong learners."
+    />
+    <meta
+      name="twitter:image"
+      content="https://cognitocards.abdulhamidoguntade.com/social-preview.svg"
+    />
+
+    <!-- Additional Meta Tags -->
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="application-name" content="Cognito Cards" />
+
+    <title>Cognito Cards - AI-Powered Flashcard Learning Platform</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Unregister any existing service workers
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (registrations) {
+            for (let registration of registrations) {
+              registration.unregister();
+              console.log("Unregistered service worker:", registration);
+            }
+          });
+      }
+    </script>
+  </body>
+</html>

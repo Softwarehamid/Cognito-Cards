@@ -1,0 +1,30 @@
+{
+  "name": "Cognito Cards - AI-Powered Flashcard Learning Platform",
+  "short_name": "Cognito Cards",
+  "description": "Transform your learning with AI-generated flashcards. Features multiple study modes, spaced repetition, and intelligent card generation from text, YouTube, and files.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "categories": ["education", "productivity", "learning"],
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/cognito-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/social-preview.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "platform": "wide",
+      "label": "Cognito Cards - AI Flashcard Platform"
+    }
+  ]
+}
