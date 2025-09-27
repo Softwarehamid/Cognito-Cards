@@ -56,10 +56,15 @@ export function useAuthState() {
     password: string,
     displayName?: string
   ) => {
+    const PROD_BASE = "https://cognitocards.abdulhamidoguntade.com";
+    const BASE_URL =
+      location.hostname === "localhost" ? window.location.origin : PROD_BASE;
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${BASE_URL}/auth/confirm`,
         data: {
           display_name: displayName || "",
         },
@@ -125,8 +130,23 @@ export function useAuthState() {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    if (error) throw error;
+    const PROD_BASE = "https://cognitocards.abdulhamidoguntade.com";
+    const BASE_URL =
+      location.hostname === "localhost" ? window.location.origin : PROD_BASE;
+
+    const redirectUrl = `${BASE_URL}/update-password`;
+    console.log("Sending password reset email with redirect:", redirectUrl);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+
+    if (error) {
+      console.error("Reset password error:", error);
+      throw error;
+    }
+
+    console.log("Password reset email sent successfully");
   };
 
   return {

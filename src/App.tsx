@@ -11,6 +11,8 @@ import { AuthLayout } from "./pages/auth/AuthLayout";
 import { Login } from "./pages/auth/Login";
 import { SignUp } from "./pages/auth/SignUp";
 import { ResetPassword } from "./pages/auth/ResetPassword";
+import { UpdatePassword } from "./pages/auth/UpdatePassword";
+import { ConfirmEmail } from "./pages/auth/ConfirmEmail";
 import { Dashboard } from "./pages/Dashboard";
 import { Study } from "./pages/Study";
 import { StudySelector } from "./pages/StudySelector";
@@ -34,7 +36,11 @@ function App() {
                 <Route path="login" element={<Login />} />
                 <Route path="signup" element={<SignUp />} />
                 <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="confirm" element={<ConfirmEmail />} />
               </Route>
+
+              {/* Password reset route (outside auth layout) */}
+              <Route path="/update-password" element={<UpdatePassword />} />
 
               {/* Protected routes */}
               <Route
