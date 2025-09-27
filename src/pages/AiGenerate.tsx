@@ -11,11 +11,11 @@ import {
   formatTokens,
   preprocessText,
 } from "../lib/aiQuota";
-import { YouTubeService } from "../lib/youtubeService";
+// YouTube functionality temporarily disabled
 import { FileProcessingService } from "../lib/fileProcessingService";
 import {
   FileText,
-  Youtube,
+  // Youtube, // Disabled for now
   Upload,
   Sparkles,
   ArrowRight,
@@ -57,7 +57,6 @@ export function AiGenerate() {
 
   const [activeTab, setActiveTab] = useState("text");
   const [textContent, setTextContent] = useState("");
-  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCards, setGeneratedCards] = useState<GeneratedCard[]>([]);
@@ -70,12 +69,11 @@ export function AiGenerate() {
   const [aiSettings, setAiSettings] = useState<UserSettings | null>(null);
   const [aiQuota, setAiQuota] = useState<AIQuota | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
-  const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
   const tabs = [
     { id: "text", name: "Text Notes", icon: <FileText className="w-4 h-4" /> },
-    { id: "youtube", name: "YouTube", icon: <Youtube className="w-4 h-4" /> },
+    // { id: "youtube", name: "YouTube", icon: <Youtube className="w-4 h-4" /> }, // Disabled for now
     { id: "upload", name: "Upload File", icon: <Upload className="w-4 h-4" /> },
   ];
 
@@ -197,31 +195,7 @@ export function AiGenerate() {
       case "text":
         content = textContent.trim();
         break;
-      case "youtube":
-        if (!youtubeUrl.trim()) {
-          toast.error("Please enter a YouTube URL");
-          return;
-        }
-
-        if (!YouTubeService.isValidYouTubeUrl(youtubeUrl)) {
-          toast.error("Please enter a valid YouTube URL");
-          return;
-        }
-
-        try {
-          setIsProcessingYouTube(true);
-          toast.loading("Extracting transcript from YouTube video...");
-          content = await YouTubeService.getTranscript(youtubeUrl);
-          toast.dismiss();
-          toast.success("Transcript extracted successfully!");
-        } catch (error: any) {
-          toast.dismiss();
-          toast.error(error.message);
-          return;
-        } finally {
-          setIsProcessingYouTube(false);
-        }
-        break;
+      // YouTube case removed - feature temporarily disabled
       case "upload":
         if (!uploadedFile) {
           toast.error("Please upload a file");
@@ -510,31 +484,7 @@ export function AiGenerate() {
               </div>
             )}
 
-            {activeTab === "youtube" && (
-              <div>
-                <label
-                  htmlFor="youtubeUrl"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  YouTube Video URL
-                </label>
-                <input
-                  type="url"
-                  id="youtubeUrl"
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                />
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  We'll extract the transcript and generate flashcards from the
-                  video content.
-                  <br />
-                  <span className="font-medium">Note:</span> The video must have
-                  captions/subtitles enabled.
-                </p>
-              </div>
-            )}
+            {/* YouTube UI temporarily removed */}
 
             {activeTab === "upload" && (
               <div>
@@ -600,7 +550,6 @@ export function AiGenerate() {
               onClick={generateCards}
               disabled={
                 isGenerating ||
-                isProcessingYouTube ||
                 isProcessingFile ||
                 !aiSettings?.ai_generation_enabled ||
                 (aiQuota ? getRemainingCredits(aiQuota) < 100 : true)
@@ -611,11 +560,6 @@ export function AiGenerate() {
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Generating Cards...
-                </>
-              ) : isProcessingYouTube ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Extracting Transcript...
                 </>
               ) : isProcessingFile ? (
                 <>
