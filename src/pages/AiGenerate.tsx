@@ -11,6 +11,8 @@ import {
   formatTokens,
   preprocessText,
 } from "../lib/aiQuota";
+import { YouTubeService } from "../lib/youtubeService";
+import { FileProcessingService } from "../lib/fileProcessingService";
 import {
   FileText,
   Youtube,
@@ -68,6 +70,8 @@ export function AiGenerate() {
   const [aiSettings, setAiSettings] = useState<UserSettings | null>(null);
   const [aiQuota, setAiQuota] = useState<AIQuota | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
+  const [isProcessingYouTube, setIsProcessingYouTube] = useState(false);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
 
   const tabs = [
     { id: "text", name: "Text Notes", icon: <FileText className="w-4 h-4" /> },
@@ -198,16 +202,49 @@ export function AiGenerate() {
           toast.error("Please enter a YouTube URL");
           return;
         }
-        content = `YouTube video: ${youtubeUrl}`;
-        toast.error("YouTube transcript extraction is not yet implemented");
-        return;
+
+        if (!YouTubeService.isValidYouTubeUrl(youtubeUrl)) {
+          toast.error("Please enter a valid YouTube URL");
+          return;
+        }
+
+        try {
+          setIsProcessingYouTube(true);
+          toast.loading("Extracting transcript from YouTube video...");
+          content = await YouTubeService.getTranscript(youtubeUrl);
+          toast.dismiss();
+          toast.success("Transcript extracted successfully!");
+        } catch (error: any) {
+          toast.dismiss();
+          toast.error(error.message);
+          return;
+        } finally {
+          setIsProcessingYouTube(false);
+        }
+        break;
       case "upload":
         if (!uploadedFile) {
           toast.error("Please upload a file");
           return;
         }
-        toast.error("File upload processing is not yet implemented");
-        return;
+
+        try {
+          setIsProcessingFile(true);
+          toast.loading("Processing uploaded file...");
+          const result = await FileProcessingService.processFile(uploadedFile);
+          content = result.text;
+          toast.dismiss();
+          toast.success(
+            `File processed successfully! Extracted ${result.text.length} characters.`
+          );
+        } catch (error: any) {
+          toast.dismiss();
+          toast.error(error.message);
+          return;
+        } finally {
+          setIsProcessingFile(false);
+        }
+        break;
       default:
         toast.error("Please select a source");
         return;
@@ -491,7 +528,10 @@ export function AiGenerate() {
                 />
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                   We'll extract the transcript and generate flashcards from the
-                  video content
+                  video content.
+                  <br />
+                  <span className="font-medium">Note:</span> The video must have
+                  captions/subtitles enabled.
                 </p>
               </div>
             )}
@@ -560,6 +600,8 @@ export function AiGenerate() {
               onClick={generateCards}
               disabled={
                 isGenerating ||
+                isProcessingYouTube ||
+                isProcessingFile ||
                 !aiSettings?.ai_generation_enabled ||
                 (aiQuota ? getRemainingCredits(aiQuota) < 100 : true)
               }
@@ -569,6 +611,16 @@ export function AiGenerate() {
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Generating Cards...
+                </>
+              ) : isProcessingYouTube ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Extracting Transcript...
+                </>
+              ) : isProcessingFile ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing File...
                 </>
               ) : !aiSettings?.ai_generation_enabled ? (
                 <>

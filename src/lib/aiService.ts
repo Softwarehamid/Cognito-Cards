@@ -205,49 +205,46 @@ class HuggingFaceProvider implements AIProvider {
   }
 
   async generateCards(content: string): Promise<GeneratedCard[]> {
-    const apiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY;
+    // For now, skip Hugging Face API calls and generate basic cards
+    // The HF Inference API can be unreliable for complex text generation
+    console.log("Hugging Face: Generating basic cards from content...");
 
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: `Create flashcards from: ${content}. Format as JSON: [{"front_text": "question", "back_text": "answer", "hint": "", "tags": [], "distractors": []}]`,
-          parameters: {
-            max_new_tokens: 1000,
-            temperature: 0.7,
-          },
-        }),
-      }
-    );
+    // Create basic cards from content instead of using HF API
+    return this.generateBasicCards(content);
+  }
 
-    if (!response.ok) {
-      throw new Error(`Hugging Face API error: ${response.statusText}`);
-    }
-
-    // HuggingFace returns different format, we'll create simpler cards
-    // For now, let's create some basic cards from the content
+  private generateBasicCards(content: string): GeneratedCard[] {
+    // Create simple cards from content sentences
     const sentences = content
       .split(/[.!?]+/)
       .filter((s) => s.trim().length > 10);
+
     const cards: GeneratedCard[] = sentences.slice(0, 5).map((sentence) => ({
-      front_text: `What is discussed in this statement: "${sentence.slice(
-        0,
-        50
-      )}..."?`,
+      front_text: `What is the key concept in: "${sentence.slice(0, 50)}..."?`,
       back_text: sentence.trim(),
-      hint: "Think about the key concept mentioned",
-      tags: ["generated", "huggingface"],
+      hint: "Look for the main idea in the statement",
+      tags: ["generated", "basic"],
       distractors: [
-        "Incorrect option A",
-        "Incorrect option B",
-        "Incorrect option C",
+        "Unrelated concept A",
+        "Incorrect interpretation B",
+        "Wrong context C",
       ],
     }));
+
+    if (cards.length === 0) {
+      // Fallback if no good sentences found
+      cards.push({
+        front_text: "What is the main topic of this content?",
+        back_text: content.slice(0, 200) + "...",
+        hint: "Consider the overall theme",
+        tags: ["generated", "summary"],
+        distractors: [
+          "Wrong topic A",
+          "Incorrect theme B",
+          "Unrelated subject C",
+        ],
+      });
+    }
 
     return cards;
   }
@@ -314,11 +311,11 @@ class GroqProvider implements AIProvider {
 
 class AIServiceManager {
   private providers: AIProvider[] = [
-    new OpenAIProvider(),
-    new GoogleGeminiProvider(),
-    new AnthropicProvider(),
-    new GroqProvider(),
-    new HuggingFaceProvider(),
+    new GroqProvider(), // Very fast and generous free tier
+    new GoogleGeminiProvider(), // Reliable and good free tier
+    new OpenAIProvider(), // High quality but limited free tier
+    new AnthropicProvider(), // High quality
+    new HuggingFaceProvider(), // Basic fallback, now more reliable
   ];
 
   getAvailableProviders(): AIProvider[] {
