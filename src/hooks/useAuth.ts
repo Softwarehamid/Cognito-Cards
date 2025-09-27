@@ -1,12 +1,16 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect, createContext, useContext } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    displayName?: string
+  ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -17,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
@@ -47,18 +51,63 @@ export function useAuthState() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (
+    email: string,
+    password: string,
+    displayName?: string
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          display_name: displayName || '',
+          display_name: displayName || "",
         },
       },
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Auth signup error:", error);
+      throw error;
+    }
+
+    // Fallback: manually create profile if trigger didn't work
+    if (data.user && data.user.id) {
+      try {
+        // Wait a bit for the trigger to potentially work first
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Check if profile already exists
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", data.user.id)
+          .single();
+
+        if (!existingProfile) {
+          // Profile doesn't exist, create it manually
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              id: data.user.id,
+              display_name: displayName || "",
+              avatar_url: "",
+            });
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+            throw new Error(
+              `Database error saving new user: ${profileError.message}`
+            );
+          }
+        }
+      } catch (profileError: any) {
+        console.error("Manual profile creation failed:", profileError);
+        throw new Error(
+          `Database error saving new user: ${profileError.message}`
+        );
+      }
+    }
   };
 
   const signIn = async (email: string, password: string) => {
